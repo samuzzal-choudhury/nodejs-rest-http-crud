@@ -1,13 +1,26 @@
+@Library('github.com/fabric8io/osio-pipeline@master') _
 
-node("launchpad-nodejs") {
-  checkout scm
-   stage("Deploy database") {
-    sh "if ! oc get service my-database | grep my-database; then oc new-app -e POSTGRESQL_USER=luke -ePOSTGRESQL_PASSWORD=secret -ePOSTGRESQL_DATABASE=my_data openshift/postgresql-92-centos7 --name=my-database; fi"
+osio {
+
+  config runtime: 'node'
+
+  ci {
+
+    def resources = processTemplate(params: [
+          release_version: "1.0.${env.BUILD_NUMBER}"
+    ])
+
+    build resources: resources
+
   }
-  stage("Build") {
-    sh "npm install"
-  }
-  stage("Deploy") {
-    sh "npm run openshift"
+
+  cd {
+
+    def resources = processTemplate(params: [
+          release_version: "1.0.${env.BUILD_NUMBER}"
+    ])
+
+    build resources: resources
+
   }
 }
